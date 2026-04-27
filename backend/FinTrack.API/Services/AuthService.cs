@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace FinTrack.API.Services;
 
-public class AuthService(IUserRepository userRepository, IConfiguration configuration) : IAuthService
+public class AuthService(IUserRepository userRepository, ICategoryRepository categoryRepository, IConfiguration configuration) : IAuthService
 {
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
@@ -24,6 +24,7 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
         };
 
         user.Id = await userRepository.CreateAsync(user);
+        await categoryRepository.SeedDefaultCategoriesAsync(user.Id);
 
         return new AuthResponse
         {
