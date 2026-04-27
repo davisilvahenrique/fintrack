@@ -21,6 +21,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
 
 // JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"]!;
