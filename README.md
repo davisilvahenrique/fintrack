@@ -2,7 +2,7 @@
 
 > Personal finance tracker — full-stack portfolio project built with ASP.NET Core 9 and React/TypeScript.
 
-**[Live Demo →](https://fintrack-7u02h6k0k-davisilvahenrique-8289s-projects.vercel.app/login)**
+**[Live Demo →](https://fintrack-eight-beta.vercel.app/login)**
 
 ---
 
