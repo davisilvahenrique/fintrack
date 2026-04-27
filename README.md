@@ -1,24 +1,76 @@
 # FinTrack
 
-Personal finance tracker — portfolio project built with ASP.NET Core 9 + React/TypeScript.
+> Personal finance tracker — full-stack portfolio project built with ASP.NET Core 9 and React/TypeScript.
 
-## Tech Stack
+**[Live Demo →](https://fintrack-jj1y1drl0-davisilvahenrique-8289s-projects.vercel.app/login)**
 
-| Layer | Technology |
-|---|---|
-| Backend | ASP.NET Core 9, Dapper, PostgreSQL |
-| Auth | JWT Bearer + BCrypt |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
-| Charts | Recharts |
-| API Docs | Swagger / OpenAPI |
+---
+
+## Demo Account
+
+Want to explore without signing up?
+
+| Field    | Value               |
+|----------|---------------------|
+| E-mail   | `demo@fintrack.app` |
+| Password | `demo123`           |
+
+The demo account has pre-loaded transactions and budgets for 2025 and 2026 so every chart and feature is visible immediately.
+
+---
 
 ## Features
 
-- **Auth** — register & login with JWT
-- **Categories** — income/expense categories (11 defaults on register)
-- **Transactions** — CRUD with monthly filter
-- **Budgets** — monthly spending limits per category
-- **Dashboard** — summary cards, annual bar chart, category pie chart, budget vs actual
+- **JWT Authentication** — register and login with hashed passwords (BCrypt); token stored in `localStorage`
+- **Transactions** — create, edit, and delete income/expense entries filtered by month and year
+- **Categories** — custom income and expense categories; 11 defaults created automatically on register
+- **Budgets** — monthly spending limits per category with animated progress bars and over-budget warnings
+- **Dashboard** — summary cards with animated counters, annual area chart with gradient fills, expense breakdown pie chart, and budget vs. actual section
+- **Responsive UI** — works on desktop and mobile; consistent dark theme throughout
+
+---
+
+## Tech Stack
+
+| Layer      | Technology                                               |
+|------------|----------------------------------------------------------|
+| Backend    | ASP.NET Core 9 (Controllers), Dapper                     |
+| Database   | PostgreSQL (hosted on [Neon](https://neon.tech))         |
+| Auth       | JWT Bearer tokens, BCrypt password hashing               |
+| API Docs   | Swagger / OpenAPI                                        |
+| Frontend   | React 19, TypeScript, Vite                               |
+| Styling    | Tailwind CSS v4                                          |
+| Animations | Framer Motion                                            |
+| Charts     | Recharts (AreaChart + PieChart)                          |
+| Routing    | React Router v7                                          |
+| Deploy     | Render (backend) + Vercel (frontend)                     |
+
+---
+
+## Architecture
+
+```
+fintrack/
+├── backend/
+│   └── FinTrack.API/
+│       ├── Controllers/        # Auth, Categories, Transactions, Budgets
+│       ├── Services/           # Business logic (interfaces + implementations)
+│       ├── Repositories/       # Dapper data access (interfaces + implementations)
+│       ├── Models/             # Domain entities
+│       ├── DTOs/               # Request/response contracts
+│       └── Infrastructure/     # DB initializer, Dapper type handlers
+└── frontend/
+    └── src/
+        ├── pages/              # Dashboard, Transactions, Login, Register
+        ├── components/         # Layout, Modal
+        ├── services/           # API calls (auth, categories, transactions, budgets)
+        ├── contexts/           # AuthContext (JWT + user state)
+        └── types/              # Shared TypeScript interfaces
+```
+
+The backend follows a layered architecture: Controllers → Services → Repositories. All database access uses Dapper with parameterized queries — no ORM.
+
+---
 
 ## Running Locally
 
@@ -26,11 +78,9 @@ Personal finance tracker — portfolio project built with ASP.NET Core 9 + React
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
 - [Node.js 20+](https://nodejs.org)
-- [PostgreSQL](https://www.postgresql.org/download/) running on `localhost:5432`
+- PostgreSQL running on `localhost:5432`
 
 ### 1 — Database
-
-Create the database and run the schema:
 
 ```bash
 psql -U postgres -c "CREATE DATABASE fintrack;"
@@ -57,55 +107,116 @@ cd backend
 dotnet run --project FinTrack.API
 ```
 
-API runs at `https://localhost:7088` — Swagger at `/swagger`.
+API starts at `https://localhost:7088`. Swagger UI is at `/swagger`.
 
 ### 3 — Frontend
 
 ```bash
 cd frontend
 npm install
+```
+
+Create `frontend/.env.local`:
+
+```
+VITE_API_URL=https://localhost:7088/api
+```
+
+```bash
 npm run dev
 ```
 
 App runs at `http://localhost:5173`.
 
-## Deploy
+---
+
+## Deploying Your Own Instance
 
 ### Backend → Render
 
 1. Create a free account at [render.com](https://render.com)
-2. Connect your GitHub repository
-3. Click **New → Blueprint** and select this repo — Render will detect `render.yaml`
-4. Set the following environment variables in the Render dashboard:
-   - `ConnectionStrings__DefaultConnection` — your PostgreSQL connection string (create a free PostgreSQL instance on Render)
+2. **New → Web Service** → connect your GitHub repository
+3. Set **Root Directory** to `backend/FinTrack.API`, **Build Command** to `dotnet publish -c Release -o out`, **Start Command** to `dotnet out/FinTrack.API.dll`
+4. Add environment variables:
+   - `ConnectionStrings__DefaultConnection` — your PostgreSQL connection string (Neon free tier recommended)
    - `Jwt__Secret` — any random string with 32+ characters
-   - `AllowedOrigin` — your Vercel frontend URL (e.g. `https://fintrack.vercel.app`)
+   - `AllowedOrigin` — your Vercel frontend URL
 
 ### Frontend → Vercel
 
 1. Create a free account at [vercel.com](https://vercel.com)
-2. Import your GitHub repository
+2. **Add New Project** → import this repository
 3. Set **Root Directory** to `frontend`
-4. Add environment variable:
-   - `VITE_API_URL` — your Render backend URL + `/api` (e.g. `https://fintrack-api.onrender.com/api`)
+4. Add environment variable (enable for **Production**, **Preview**, and **Development**):
+   - `VITE_API_URL` — your Render backend URL + `/api` (e.g. `https://your-api.onrender.com/api`)
 5. Deploy
 
-## API Endpoints
+---
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Create account + get JWT |
-| POST | `/api/auth/login` | Login + get JWT |
-| GET | `/api/categories` | List categories |
-| POST | `/api/categories` | Create category |
-| PUT | `/api/categories/{id}` | Update category |
-| DELETE | `/api/categories/{id}` | Delete category |
-| GET | `/api/transactions?month=4&year=2026` | List transactions |
-| POST | `/api/transactions` | Create transaction |
-| PUT | `/api/transactions/{id}` | Update transaction |
-| DELETE | `/api/transactions/{id}` | Delete transaction |
-| GET | `/api/transactions/summary?year=2026` | Monthly totals for year |
-| GET | `/api/budgets?month=4&year=2026` | List budgets |
-| POST | `/api/budgets` | Create budget |
-| PUT | `/api/budgets/{id}` | Update budget |
-| DELETE | `/api/budgets/{id}` | Delete budget |
+## API Reference
+
+All endpoints except Auth require `Authorization: Bearer <token>`.
+
+### Auth
+
+| Method | Endpoint             | Description              |
+|--------|----------------------|--------------------------|
+| POST   | `/api/auth/register` | Create account, get JWT  |
+| POST   | `/api/auth/login`    | Login, get JWT           |
+
+```json
+// Request body (register includes "name")
+{ "name": "Ada Lovelace", "email": "ada@example.com", "password": "secret" }
+
+// Response
+{ "token": "eyJ...", "name": "Ada Lovelace", "email": "ada@example.com" }
+```
+
+### Categories
+
+| Method | Endpoint               | Description          |
+|--------|------------------------|----------------------|
+| GET    | `/api/categories`      | List all categories  |
+| POST   | `/api/categories`      | Create category      |
+| PUT    | `/api/categories/{id}` | Update category      |
+| DELETE | `/api/categories/{id}` | Delete category      |
+
+### Transactions
+
+| Method | Endpoint                              | Description                   |
+|--------|---------------------------------------|-------------------------------|
+| GET    | `/api/transactions?month=4&year=2026` | List transactions for period  |
+| POST   | `/api/transactions`                   | Create transaction            |
+| PUT    | `/api/transactions/{id}`              | Update transaction            |
+| DELETE | `/api/transactions/{id}`              | Delete transaction            |
+| GET    | `/api/transactions/summary?year=2026` | Monthly income/expense totals |
+
+```json
+// Create / Update body
+{
+  "amount": 1500.00,
+  "type": "income",
+  "categoryId": 1,
+  "description": "Salary",
+  "date": "2026-04-01"
+}
+```
+
+### Budgets
+
+| Method | Endpoint                           | Description             |
+|--------|------------------------------------|-------------------------|
+| GET    | `/api/budgets?month=4&year=2026`   | List budgets for period |
+| POST   | `/api/budgets`                     | Create budget           |
+| PUT    | `/api/budgets/{id}`                | Update budget           |
+| DELETE | `/api/budgets/{id}`                | Delete budget           |
+
+---
+
+## Default Categories
+
+11 categories are seeded automatically when a new account is created:
+
+**Income:** Salário · Freelance · Investimentos · Outros
+
+**Expense:** Alimentação · Transporte · Moradia · Saúde · Educação · Lazer · Outros
