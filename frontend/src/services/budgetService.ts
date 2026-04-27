@@ -1,5 +1,5 @@
 import { api } from './api'
-import { Budget } from '../types'
+import type { Budget } from '../types'
 
 export const budgetService = {
   list: (month: number, year: number) =>

@@ -6,7 +6,7 @@ import {
 } from 'recharts'
 import { transactionService } from '../services/transactionService'
 import { budgetService } from '../services/budgetService'
-import { Transaction, Budget, TransactionSummary } from '../types'
+import type { Transaction, Budget, TransactionSummary } from '../types'
 
 const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 const PIE_COLORS = ['#818cf8', '#34d399', '#fb923c', '#f472b6', '#60a5fa', '#a78bfa', '#fbbf24', '#4ade80']
@@ -109,7 +109,7 @@ export default function Dashboard() {
               <Tooltip
                 contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
                 labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
-                formatter={(v: number) => [fmt(v)]}
+                formatter={(v) => [fmt(Number(v))]}
               />
               <Bar dataKey="income" name="Receitas" fill="#34d399" radius={[4, 4, 0, 0]} />
               <Bar dataKey="expenses" name="Despesas" fill="#fb7185" radius={[4, 4, 0, 0]} />
@@ -131,7 +131,7 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
-                  formatter={(v: number) => [fmt(v)]}
+                  formatter={(v) => [fmt(Number(v))]}
                 />
                 <Legend iconType="circle" iconSize={8} formatter={v => <span style={{ color: '#94a3b8', fontSize: 12 }}>{v}</span>} />
               </PieChart>

@@ -1,5 +1,5 @@
 import { api } from './api'
-import { Transaction, TransactionSummary } from '../types'
+import type { Transaction, TransactionSummary } from '../types'
 
 interface TransactionPayload {
   amount: number

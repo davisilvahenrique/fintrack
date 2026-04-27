@@ -1,9 +1,9 @@
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import Modal from '../components/Modal'
 import { transactionService } from '../services/transactionService'
 import { categoryService } from '../services/categoryService'
-import { Transaction, Category } from '../types'
+import type { Transaction, Category } from '../types'
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
