@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { motion, type Variants } from 'framer-motion'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, PieChart, Pie, Legend,
@@ -13,6 +14,16 @@ const PIE_COLORS = ['#818cf8', '#34d399', '#fb923c', '#f472b6', '#60a5fa', '#a78
 
 function fmt(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+}
+
+const sectionVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 }
 
 export default function Dashboard() {
@@ -66,48 +77,59 @@ export default function Dashboard() {
     return map
   }, [transactions])
 
+  const selectClass = 'px-3 py-1.5 bg-slate-800 border border-slate-700/80 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-colors'
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-100">Dashboard</h1>
+        <h1 className="text-xl font-bold text-slate-100">Dashboard</h1>
         <div className="flex items-center gap-2">
-          <select
-            value={month}
-            onChange={e => setMonth(Number(e.target.value))}
-            className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
-          >
+          <select value={month} onChange={e => setMonth(Number(e.target.value))} className={selectClass}>
             {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
-          <select
-            value={year}
-            onChange={e => setYear(Number(e.target.value))}
-            className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
-          >
+          <select value={year} onChange={e => setYear(Number(e.target.value))} className={selectClass}>
             {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <SummaryCard label="Receitas" value={totalIncome} icon={TrendingUp} color="text-emerald-400" bg="bg-emerald-400/10" />
-        <SummaryCard label="Despesas" value={totalExpenses} icon={TrendingDown} color="text-rose-400" bg="bg-rose-400/10" />
-        <SummaryCard label="Saldo do Mês" value={balance} icon={Wallet} color={balance >= 0 ? 'text-indigo-400' : 'text-rose-400'} bg="bg-indigo-400/10" />
-      </div>
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+      >
+        <SummaryCard label="Receitas" value={totalIncome} icon={TrendingUp} color="text-emerald-400" bg="bg-emerald-400/10" border="hover:border-emerald-500/30" />
+        <SummaryCard label="Despesas" value={totalExpenses} icon={TrendingDown} color="text-rose-400" bg="bg-rose-400/10" border="hover:border-rose-500/30" />
+        <SummaryCard
+          label="Saldo do Mês"
+          value={balance}
+          icon={Wallet}
+          color={balance >= 0 ? 'text-indigo-400' : 'text-rose-400'}
+          bg="bg-indigo-400/10"
+          border="hover:border-indigo-500/30"
+        />
+      </motion.div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+        variants={sectionVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-xl p-5">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
             Visão Anual — {year}
           </h2>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={barData} barSize={14} barGap={4}>
+            <BarChart data={barData} barSize={12} barGap={3}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-              <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} />
               <Tooltip
-                contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
+                contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 12 }}
                 labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
                 formatter={(v) => [fmt(Number(v))]}
               />
@@ -117,33 +139,40 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
+        <div className="bg-slate-900 border border-slate-800/80 rounded-xl p-5">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
             Gastos por Categoria
           </h2>
           {pieData.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-slate-500 text-sm">Sem despesas no período</div>
+            <div className="flex items-center justify-center h-48 text-slate-600 text-sm">
+              Sem despesas no período
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie data={pieData} dataKey="value" cx="50%" cy="45%" innerRadius={50} outerRadius={80} paddingAngle={3}>
+                <Pie data={pieData} dataKey="value" cx="50%" cy="45%" innerRadius={48} outerRadius={78} paddingAngle={3}>
                   {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
+                  contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 12 }}
                   formatter={(v) => [fmt(Number(v))]}
                 />
-                <Legend iconType="circle" iconSize={8} formatter={v => <span style={{ color: '#94a3b8', fontSize: 12 }}>{v}</span>} />
+                <Legend iconType="circle" iconSize={7} formatter={v => <span style={{ color: '#94a3b8', fontSize: 11 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Budget vs Actual */}
       {budgets.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
+        <motion.div
+          className="bg-slate-900 border border-slate-800/80 rounded-xl p-5"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-5">
             Orçamentos — {MONTHS[month - 1]} {year}
           </h2>
           <div className="space-y-4">
@@ -153,40 +182,45 @@ export default function Dashboard() {
               const over = spent > b.amount
               return (
                 <div key={b.id}>
-                  <div className="flex justify-between text-sm mb-1.5">
+                  <div className="flex justify-between text-sm mb-2">
                     <span className="text-slate-200 font-medium">{b.categoryName}</span>
-                    <span className={over ? 'text-rose-400' : 'text-slate-400'}>
-                      {fmt(spent)} <span className="text-slate-600">/</span> {fmt(b.amount)}
+                    <span className={over ? 'text-rose-400 font-medium' : 'text-slate-400'}>
+                      {fmt(spent)} <span className="text-slate-700">/</span> {fmt(b.amount)}
                     </span>
                   </div>
                   <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${over ? 'bg-rose-500' : 'bg-indigo-500'}`}
-                      style={{ width: `${pct}%` }}
+                    <motion.div
+                      className={`h-full rounded-full ${over ? 'bg-rose-500' : 'bg-indigo-500'}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                     />
                   </div>
                 </div>
               )
             })}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   )
 }
 
 function SummaryCard({
-  label, value, icon: Icon, color, bg,
-}: { label: string; value: number; icon: React.ElementType; color: string; bg: string }) {
+  label, value, icon: Icon, color, bg, border,
+}: { label: string; value: number; icon: React.ElementType; color: string; bg: string; border: string }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center gap-4">
-      <div className={`${bg} p-3 rounded-xl`}>
-        <Icon className={color} size={22} />
+    <motion.div
+      variants={cardVariants}
+      className={`bg-slate-900 border border-slate-800/80 rounded-xl p-5 flex items-center gap-4 transition-colors duration-200 ${border}`}
+    >
+      <div className={`${bg} p-3 rounded-xl shrink-0`}>
+        <Icon className={color} size={20} />
       </div>
       <div>
-        <p className="text-sm text-slate-400">{label}</p>
-        <p className={`text-xl font-bold mt-0.5 ${color}`}>{fmt(value)}</p>
+        <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{label}</p>
+        <p className={`text-xl font-bold mt-1 ${color}`}>{fmt(value)}</p>
       </div>
-    </div>
+    </motion.div>
   )
 }

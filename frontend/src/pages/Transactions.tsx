@@ -1,5 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Receipt } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Modal from '../components/Modal'
 import { transactionService } from '../services/transactionService'
 import { categoryService } from '../services/categoryService'
@@ -25,6 +26,8 @@ interface FormState {
 }
 
 const emptyForm: FormState = { amount: '', type: 'expense', categoryId: '', description: '', date: today() }
+
+const fieldClass = 'w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors'
 
 export default function Transactions() {
   const now = new Date()
@@ -119,79 +122,96 @@ export default function Transactions() {
     }
   }
 
+  const selectClass = 'px-3 py-1.5 bg-slate-800 border border-slate-700/80 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-colors'
+
   return (
     <div className="p-6 space-y-5 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-100">Transações</h1>
+        <h1 className="text-xl font-bold text-slate-100">Transações</h1>
         <div className="flex items-center gap-2">
-          <select
-            value={month}
-            onChange={e => setMonth(Number(e.target.value))}
-            className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
-          >
+          <select value={month} onChange={e => setMonth(Number(e.target.value))} className={selectClass}>
             {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
-          <select
-            value={year}
-            onChange={e => setYear(Number(e.target.value))}
-            className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
-          >
+          <select value={year} onChange={e => setYear(Number(e.target.value))} className={selectClass}>
             {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
-            <Plus size={16} />
+            <Plus size={15} />
             Nova
           </button>
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-800/80 rounded-xl overflow-hidden">
         {transactions.length === 0 ? (
-          <div className="py-16 text-center text-slate-500">Nenhuma transação neste período</div>
+          <motion.div
+            className="flex flex-col items-center justify-center py-20 text-center gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="p-4 bg-slate-800/60 rounded-full">
+              <Receipt size={24} className="text-slate-600" />
+            </div>
+            <p className="text-slate-500 text-sm">Nenhuma transação em {MONTHS[month - 1]} {year}</p>
+            <button onClick={openCreate} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">
+              + Adicionar transação
+            </button>
+          </motion.div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
-                <th className="text-left px-5 py-3">Data</th>
-                <th className="text-left px-5 py-3">Descrição</th>
-                <th className="text-left px-5 py-3">Categoria</th>
-                <th className="text-right px-5 py-3">Valor</th>
-                <th className="px-3 py-3" />
+              <tr className="border-b border-slate-800/80 text-slate-500 text-xs uppercase tracking-widest">
+                <th className="text-left px-5 py-3.5">Data</th>
+                <th className="text-left px-5 py-3.5">Descrição</th>
+                <th className="text-left px-5 py-3.5">Categoria</th>
+                <th className="text-right px-5 py-3.5">Valor</th>
+                <th className="px-3 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
-              {transactions.map(t => (
-                <tr key={t.id} className="hover:bg-slate-800/50 transition-colors">
-                  <td className="px-5 py-3.5 text-slate-400 whitespace-nowrap">
+            <tbody className="divide-y divide-slate-800/60">
+              {transactions.map((t, i) => (
+                <motion.tr
+                  key={t.id}
+                  className="hover:bg-slate-800/40 transition-colors"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.03, ease: 'easeOut' }}
+                >
+                  <td className="px-5 py-3.5 text-slate-500 whitespace-nowrap text-xs">
                     {new Date(t.date + 'T12:00:00').toLocaleDateString('pt-BR')}
                   </td>
-                  <td className="px-5 py-3.5 text-slate-200">{t.description || <span className="text-slate-600">—</span>}</td>
-                  <td className="px-5 py-3.5">
-                    <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md text-xs">{t.categoryName}</span>
+                  <td className="px-5 py-3.5 text-slate-200">
+                    {t.description || <span className="text-slate-700">—</span>}
                   </td>
-                  <td className={`px-5 py-3.5 text-right font-semibold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <td className="px-5 py-3.5">
+                    <span className="px-2 py-0.5 bg-slate-800 text-slate-400 rounded-md text-xs border border-slate-700/50">
+                      {t.categoryName}
+                    </span>
+                  </td>
+                  <td className={`px-5 py-3.5 text-right font-semibold tabular-nums ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {t.type === 'income' ? '+' : '-'}{fmt(t.amount)}
                   </td>
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-1 justify-end">
                       <button
                         onClick={() => openEdit(t)}
-                        className="p-1.5 text-slate-500 hover:text-slate-200 hover:bg-slate-700 rounded-md transition-colors"
+                        className="p-1.5 text-slate-600 hover:text-slate-200 hover:bg-slate-700 rounded-md transition-colors"
                       >
-                        <Pencil size={14} />
+                        <Pencil size={13} />
                       </button>
                       <button
                         onClick={() => openDelete(t)}
-                        className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors"
+                        className="p-1.5 text-slate-600 hover:text-rose-400 hover:bg-rose-400/10 rounded-md transition-colors"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
@@ -208,7 +228,7 @@ export default function Transactions() {
                 <select
                   value={form.type}
                   onChange={e => setForm(f => ({ ...f, type: e.target.value as 'income' | 'expense', categoryId: '' }))}
-                  className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
+                  className={fieldClass}
                 >
                   <option value="expense">Despesa</option>
                   <option value="income">Receita</option>
@@ -223,7 +243,7 @@ export default function Transactions() {
                   value={form.amount}
                   onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
                   required
-                  className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
+                  className={fieldClass}
                   placeholder="0,00"
                 />
               </div>
@@ -235,7 +255,7 @@ export default function Transactions() {
                 value={form.categoryId}
                 onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}
                 required
-                className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
+                className={fieldClass}
               >
                 <option value="">Selecione…</option>
                 {filteredCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -243,12 +263,14 @@ export default function Transactions() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Descrição <span className="text-slate-600">(opcional)</span></label>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                Descrição <span className="text-slate-700">(opcional)</span>
+              </label>
               <input
                 type="text"
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
+                className={fieldClass}
                 placeholder="Ex: Almoço no trabalho"
               />
             </div>
@@ -260,7 +282,7 @@ export default function Transactions() {
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
                 required
-                className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-indigo-500"
+                className={fieldClass}
               />
             </div>
 
@@ -293,7 +315,7 @@ export default function Transactions() {
         <Modal title="Excluir transação" onClose={() => setModal(null)}>
           <p className="text-slate-300 text-sm mb-5">
             Tem certeza que deseja excluir esta transação?
-            {selected.description && <><br /><span className="text-slate-400">{selected.description}</span></>}
+            {selected.description && <><br /><span className="text-slate-500 mt-1 block">{selected.description}</span></>}
           </p>
           {error && (
             <p className="text-sm text-rose-400 bg-rose-400/10 border border-rose-400/20 rounded-lg px-3 py-2 mb-4">{error}</p>
