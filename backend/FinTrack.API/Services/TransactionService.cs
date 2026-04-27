@@ -11,6 +11,11 @@ public class TransactionService(ITransactionRepository transactionRepository, IC
         return await transactionRepository.GetByMonthAsync(userId, month, year);
     }
 
+    public async Task<IEnumerable<TransactionSummaryResponse>> GetYearlySummaryAsync(int userId, int year)
+    {
+        return await transactionRepository.GetYearlySummaryAsync(userId, year);
+    }
+
     public async Task<TransactionResponse> CreateAsync(int userId, CreateTransactionRequest request)
     {
         var category = await categoryRepository.GetByIdAsync(request.CategoryId, userId)

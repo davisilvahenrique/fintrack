@@ -6,6 +6,7 @@ namespace FinTrack.API.Repositories;
 public interface ITransactionRepository
 {
     Task<IEnumerable<TransactionResponse>> GetByMonthAsync(int userId, int month, int year);
+    Task<IEnumerable<TransactionSummaryResponse>> GetYearlySummaryAsync(int userId, int year);
     Task<Transaction?> GetByIdAsync(int id, int userId);
     Task<int> CreateAsync(Transaction transaction);
     Task UpdateAsync(Transaction transaction);

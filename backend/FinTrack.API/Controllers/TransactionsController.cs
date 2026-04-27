@@ -24,6 +24,14 @@ public class TransactionsController(ITransactionService transactionService) : Co
         return Ok(transactions);
     }
 
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetYearlySummary([FromQuery] int? year)
+    {
+        var y = year ?? DateTime.Now.Year;
+        var summary = await transactionService.GetYearlySummaryAsync(UserId, y);
+        return Ok(summary);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateTransactionRequest request)
     {

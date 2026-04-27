@@ -14,6 +14,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var allowedOrigins = new List<string> { "http://localhost:5173" };
+var configuredOrigin = builder.Configuration["AllowedOrigin"];
+if (!string.IsNullOrEmpty(configuredOrigin))
+    allowedOrigins.Add(configuredOrigin);
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins([.. allowedOrigins])
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 // Dependency Injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -48,6 +61,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fintrack-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Secret
+        sync: false
+      - key: AllowedOrigin
+        sync: false

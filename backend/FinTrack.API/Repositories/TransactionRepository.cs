@@ -67,6 +67,25 @@ public class TransactionRepository(IConfiguration configuration) : ITransactionR
             transaction);
     }
 
+    public async Task<IEnumerable<TransactionSummaryResponse>> GetYearlySummaryAsync(int userId, int year)
+    {
+        using var connection = new NpgsqlConnection(_connectionString);
+        return await connection.QueryAsync<TransactionSummaryResponse>(
+            """
+            SELECT
+                EXTRACT(MONTH FROM "Date")::SMALLINT AS "Month",
+                SUM(CASE WHEN "Type" = 'income'  THEN "Amount" ELSE 0 END) AS "TotalIncome",
+                SUM(CASE WHEN "Type" = 'expense' THEN "Amount" ELSE 0 END) AS "TotalExpenses"
+            FROM "Transactions"
+            WHERE "UserId" = @UserId
+              AND EXTRACT(YEAR FROM "Date") = @Year
+              AND "DeletedAt" IS NULL
+            GROUP BY EXTRACT(MONTH FROM "Date")
+            ORDER BY EXTRACT(MONTH FROM "Date")
+            """,
+            new { UserId = userId, Year = year });
+    }
+
     public async Task SoftDeleteAsync(int id, int userId)
     {
         using var connection = new NpgsqlConnection(_connectionString);

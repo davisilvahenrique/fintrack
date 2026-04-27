@@ -29,3 +29,9 @@ export interface Budget {
   month: number
   year: number
 }
+
+export interface TransactionSummary {
+  month: number
+  totalIncome: number
+  totalExpenses: number
+}
