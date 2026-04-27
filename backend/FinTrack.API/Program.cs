@@ -14,15 +14,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var allowedOrigins = new List<string> { "http://localhost:5173" };
-var configuredOrigin = builder.Configuration["AllowedOrigin"];
-if (!string.IsNullOrEmpty(configuredOrigin))
-    allowedOrigins.Add(configuredOrigin);
+var configuredOrigin = builder.Configuration["AllowedOrigin"] ?? "";
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins([.. allowedOrigins])
+        policy.SetIsOriginAllowed(origin =>
+                origin == "http://localhost:5173" ||
+                origin.EndsWith(".vercel.app") ||
+                (!string.IsNullOrEmpty(configuredOrigin) && origin == configuredOrigin))
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
