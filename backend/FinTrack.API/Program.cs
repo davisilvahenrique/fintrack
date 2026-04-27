@@ -60,6 +60,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+await FinTrack.API.Infrastructure.DatabaseInitializer.InitializeAsync(connectionString);
+
 app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthentication();
