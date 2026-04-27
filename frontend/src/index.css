@@ -29,3 +29,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.4);
   cursor: pointer;
 }
+
+/* Subtle dot grid on dark bg */
+.dot-grid {
+  background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Smooth number transitions */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
